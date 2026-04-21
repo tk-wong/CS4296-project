@@ -7,4 +7,4 @@ source $HOME/.local/bin/env
 uv sync --no-dev 
 
 # run the application
-sudo $(which uv) run uvicorn main:app --host 0.0.0.0 --port 80
+sudo $(which uv) run uvicorn main:app --host 0.0.0.0 --port 8000
