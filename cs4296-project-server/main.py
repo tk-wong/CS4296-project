@@ -12,7 +12,7 @@ handler = Mangum(app)
 async def root():
     return {"message": "Hello World"}
 
-@app.post("/image/")
+@app.post("/image")
 async def covert_image(image:UploadFile = File(...)):
     accept_type = ["image/jpeg"]
     if image.content_type not in accept_type:
