@@ -1,4 +1,6 @@
 import argparse
+import datetime
+
 import requests
 import time
 import io
@@ -6,6 +8,7 @@ import boto3
 import csv
 import os
 from concurrent.futures import ThreadPoolExecutor
+
 
 def get_image_data(source_type, path_or_key, bucket_name=None):
     """Fetches image data from S3 or local disk."""
@@ -19,6 +22,7 @@ def get_image_data(source_type, path_or_key, bucket_name=None):
         with open(path_or_key, 'rb') as f:
             return f.read()
 
+
 def send_request(url, image_bytes):
     """Sends a single POST request to the API."""
     try:
@@ -31,13 +35,14 @@ def send_request(url, image_bytes):
     except Exception as e:
         return None, str(e)
 
+
 def run_load_test(arguments):
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"STARTING LOAD TEST")
     print(f"URL: {arguments.url}")
     print(f"Mode: {arguments.source} | Concurrency: {arguments.concurrency}")
     print(f"Target: {arguments.requests} requests")
-    print(f"{'='*50}\n")
+    print(f"{'=' * 50}\n")
 
     print("Fetching image data...")
     img_data = get_image_data(arguments.source, arguments.path, arguments.bucket)
@@ -62,7 +67,7 @@ def run_load_test(arguments):
                 print(f"Progress: {completed}/{arguments.requests} requests completed...")
 
     # Log completion
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print("LOAD TEST FINISHED")
 
     # Summary calculation
@@ -73,7 +78,7 @@ def run_load_test(arguments):
         print(f"Max Latency: {max(latencies):.2f} ms")
 
     # CSV Writing
-    output_filename = arguments.csv if arguments.csv else f"load_test_{int(time.time())}.csv"
+    output_filename = arguments.csv if arguments.csv else f"load_test_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
     print(f"Writing results to {output_filename}...")
     with open(output_filename, 'w', newline='') as f:
         writer = csv.writer(f)
@@ -91,7 +96,8 @@ def run_load_test(arguments):
         except Exception as e:
             print(f"S3 Upload Failed: {e}")
 
-    print(f"{'='*50}\n")
+    print(f"{'=' * 50}\n")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Performance Load Test for FastAPI")

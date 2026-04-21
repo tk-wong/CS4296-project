@@ -1,4 +1,6 @@
 import argparse
+import datetime
+
 import requests
 import time
 import csv
@@ -33,25 +35,27 @@ def run_benchmark(url, source_type, path_or_key, bucket, csv_name, rounds):
         print(f"\n--- Round {i + 1} ---")
 
         # 1. Fetch image data (Memory-efficient approach)
+        print(f"Loading image data...")
         image_bytes = get_image_data(source_type, path_or_key, bucket)
 
         # 2. Perform the request
+        print(f"Sending request...")
         start = time.perf_counter()
         try:
             # Send binary data directly
-            print(f"Sending request with image data to {url} ...")
+            print(f"Sending request with image data to {url}")
             response = requests.post(url, files={"image": ("upload.jpeg",image_bytes, "image/jpeg")}, headers={
                                                                      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'},
                                      timeout=60)
             if response.status_code != 200:
                 print(f"Warning: Received status code {response.status_code} with message {response.text}")
             else:
-                print(f"Round {i + 1}: Request successful.")
+                print(f"Request successful.")
             end = time.perf_counter()
 
             latency = (end - start) * 1000
             print(f"Total Latency: {latency:.2f}ms")
-            results.append([i + 1, latency])
+            results.append([i + 1, latency, response.status_code])
 
         except Exception as e:
             print(f"Error during request: {e}")
@@ -60,17 +64,22 @@ def run_benchmark(url, source_type, path_or_key, bucket, csv_name, rounds):
         if i < rounds - 1:
             print("Sleeping for 30 minutes to force cold start...")
             time.sleep(1800)
+            print(f"Round {i + 1} complete.")
 
     # Save to CSV
-    with open(csv_name, 'w', newline='') as f:
+    print("Writing results to CSV...")
+    
+    final_csv_name = csv_name if csv_name else f"latency_test_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
+    with open(final_csv_name, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['Round', 'Total Latency (ms)'])
+        writer.writerow(['Round', 'Total Latency (ms)', 'Status code'])
         writer.writerows(results)
-
-    print(f"\nDone! Results saved to {csv_name}")
-
+    print(f"\nDone! Results saved to {final_csv_name}")
+    
     if source_type == 's3':
+        print("Uploading CSV to S3...")
         s3_client.upload_file(csv_name, bucket, csv_name)
+        
     print("Benchmark completed successfully.")
 
 
@@ -80,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("--source", choices=['local', 's3'], required=True, help="Data source type")
     parser.add_argument("--path", required=True, help="Local file path or S3 key")
     parser.add_argument("--bucket", help="S3 Bucket name (required if source is s3)")
-    parser.add_argument("--csv", default="results.csv", help="Output CSV filename")
+    parser.add_argument("--csv", help="Output CSV filename")
     parser.add_argument("--rounds", type=int, default=5, help="Number of test rounds")
 
     args = parser.parse_args()
