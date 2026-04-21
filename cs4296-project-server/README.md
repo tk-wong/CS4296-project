@@ -6,3 +6,4 @@
 pip3 install --platform manylinux2014_x86_64 -t dependencies --only-binary=:all: .
 ```
 3. zip the dependencies and upload to lamba function 
+4. press "Deploy" to deploy the function
