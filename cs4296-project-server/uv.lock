@@ -67,7 +67,7 @@ wheels = [
 ]
 
 [[package]]
-name = "cs4296-project"
+name = "cs4296-project-server"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
