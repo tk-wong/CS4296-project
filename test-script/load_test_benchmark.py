@@ -46,7 +46,7 @@ def run_load_test(arguments):
     print(f"Start Timestamp: {int(time.time())}")
 
     print("Fetching image data...")
-    img_data = get_image_data(arguments.source, arguments.path, arguments.bucket)
+    img_data = get_image_data(arguments.source, arguments.path)
     print(f"Successfully loaded image data ({len(img_data)} bytes).")
 
     results = []
