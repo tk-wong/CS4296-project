@@ -13,17 +13,12 @@ while true; do
     fi
     
     DATA=$(top -b -n 2 -d 0.2 -p "$PIDS" | tail -1 | awk '
-        NF && NR > 7 {
+        NF {
             cpu = $(NF-2)
             mem = $(NF-1)
             gsub(/%/, "", cpu)
             gsub(/%/, "", mem)
-            total_cpu += cpu
-            total_mem += mem
-            found = 1
-        }
-        END {
-            if (found) print total_cpu "," total_mem
+            print cpu "," mem
         }')
     
     TIMESTAMP=$(date +%s)
