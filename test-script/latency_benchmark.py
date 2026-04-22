@@ -98,6 +98,6 @@ if __name__ == "__main__":
     # if args.source == 's3' and not args.bucket:
     #     parser.error("The --bucket argument is required when --source is 's3'")
 
-    run_benchmark(args.url, args.source, args.path, args.bucket, args.csv, args.rounds)
+    run_benchmark(args.url, args.source, args.path, None, args.csv, args.rounds)
 
 # image link: https://unsplash.com/photos/water-reflection-of-coconut-palm-trees-wAn4RfmXtxU?utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink
