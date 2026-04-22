@@ -12,7 +12,7 @@ while true; do
         continue
     fi
     
-    DATA=$(top -bn1 -p "$PIDS" | awk '
+    DATA=$(top -b -n 2 -d 0.2 -p "$PIDS" | tail -1 | awk '
         NF && NR > 7 {
             cpu = $(NF-2)
             mem = $(NF-1)
