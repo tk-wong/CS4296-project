@@ -77,6 +77,10 @@ def run_load_test(arguments):
         avg = sum(latencies) / len(latencies)
         print(f"Average Latency: {avg:.2f} ms")
         print(f"Max Latency: {max(latencies):.2f} ms")
+    else:
+        print("No latency is found. There may be an error occurred during the requests.")
+        print(f"{'=' * 50}")
+        exit(1)
 
     # CSV Writing
     output_filename = arguments.csv if arguments.csv else f"load_test_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
