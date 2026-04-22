@@ -15,16 +15,16 @@ def get_image_data(source_type, path_or_key, bucket_name=None):
     """
     Returns image bytes based on the source type.
     """
-    if source_type == 's3':
-        print(f"Downloading {path_or_key} from S3 bucket {bucket_name}...")
-        buffer = io.BytesIO()
-        s3_client.download_fileobj(bucket_name, path_or_key, buffer)
-        buffer.seek(0)
-        return buffer.getvalue()
-    else:
-        print(f"Reading {path_or_key} from local disk...")
-        with open(path_or_key, 'rb') as f:
-            return f.read()
+    # if source_type == 's3':
+    #     print(f"Downloading {path_or_key} from S3 bucket {bucket_name}...")
+    #     buffer = io.BytesIO()
+    #     s3_client.download_fileobj(bucket_name, path_or_key, buffer)
+    #     buffer.seek(0)
+    #     return buffer.getvalue()
+    # else:
+    print(f"Reading {path_or_key} from local disk...")
+    with open(path_or_key, 'rb') as f:
+        return f.read()
 
 
 def run_benchmark(url, source_type, path_or_key, bucket, csv_name, rounds):
@@ -76,9 +76,9 @@ def run_benchmark(url, source_type, path_or_key, bucket, csv_name, rounds):
         writer.writerows(results)
     print(f"\nDone! Results saved to {final_csv_name}")
     
-    if source_type == 's3':
-        print("Uploading CSV to S3...")
-        s3_client.upload_file(csv_name, bucket, csv_name)
+    # if source_type == 's3':
+    #     print("Uploading CSV to S3...")
+    #     s3_client.upload_file(csv_name, bucket, csv_name)
         
     print("Benchmark completed successfully.")
 
@@ -88,15 +88,15 @@ if __name__ == "__main__":
     parser.add_argument("--url", required=True, help="API Endpoint URL")
     parser.add_argument("--source", choices=['local', 's3'], required=True, help="Data source type")
     parser.add_argument("--path", required=True, help="Local file path or S3 key")
-    parser.add_argument("--bucket", help="S3 Bucket name (required if source is s3)")
+    # parser.add_argument("--bucket", help="S3 Bucket name (required if source is s3)")
     parser.add_argument("--csv", help="Output CSV filename")
     parser.add_argument("--rounds", type=int, default=5, help="Number of test rounds")
 
     args = parser.parse_args()
 
     # Validation
-    if args.source == 's3' and not args.bucket:
-        parser.error("The --bucket argument is required when --source is 's3'")
+    # if args.source == 's3' and not args.bucket:
+    #     parser.error("The --bucket argument is required when --source is 's3'")
 
     run_benchmark(args.url, args.source, args.path, args.bucket, args.csv, args.rounds)
 

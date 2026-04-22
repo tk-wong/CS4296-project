@@ -12,15 +12,15 @@ from concurrent.futures import ThreadPoolExecutor
 
 def get_image_data(source_type, path_or_key, bucket_name=None):
     """Fetches image data from S3 or local disk."""
-    if source_type == 's3':
-        s3_client = boto3.client('s3')
-        buffer = io.BytesIO()
-        s3_client.download_fileobj(bucket_name, path_or_key, buffer)
-        buffer.seek(0)
-        return buffer.getvalue()
-    else:
-        with open(path_or_key, 'rb') as f:
-            return f.read()
+    # if source_type == 's3':
+    #     s3_client = boto3.client('s3')
+    #     buffer = io.BytesIO()
+    #     s3_client.download_fileobj(bucket_name, path_or_key, buffer)
+    #     buffer.seek(0)
+    #     return buffer.getvalue()
+    # else:
+    with open(path_or_key, 'rb') as f:
+        return f.read()
 
 
 def send_request(url, image_bytes):
@@ -86,15 +86,15 @@ def run_load_test(arguments):
         for lat, status in results:
             writer.writerow([time.time(), lat, status])
 
-    # S3 Upload
-    if arguments.bucket:
-        print(f"Attempting upload to S3 bucket: {arguments.bucket}...")
-        s3 = boto3.client('s3')
-        try:
-            s3.upload_file(output_filename, arguments.bucket, output_filename)
-            print("S3 Upload Successful.")
-        except Exception as e:
-            print(f"S3 Upload Failed: {e}")
+    # # S3 Upload
+    # if arguments.bucket:
+    #     print(f"Attempting upload to S3 bucket: {arguments.bucket}...")
+    #     s3 = boto3.client('s3')
+    #     try:
+    #         s3.upload_file(output_filename, arguments.bucket, output_filename)
+    #         print("S3 Upload Successful.")
+    #     except Exception as e:
+    #         print(f"S3 Upload Failed: {e}")
 
     print(f"{'=' * 50}\n")
 
@@ -104,14 +104,14 @@ if __name__ == "__main__":
     parser.add_argument("--url", required=True, help="API Endpoint URL")
     parser.add_argument("--source", choices=['local', 's3'], required=True, help="Data source")
     parser.add_argument("--path", required=True, help="Local file path or S3 key")
-    parser.add_argument("--bucket", help="S3 Bucket name")
+    # parser.add_argument("--bucket", help="S3 Bucket name")
     parser.add_argument("--requests", type=int, default=50, help="Total number of requests")
     parser.add_argument("--concurrency", type=int, default=5, help="Number of concurrent workers")
     parser.add_argument("--csv", help="Output filename")
 
     args = parser.parse_args()
 
-    if args.source == 's3' and not args.bucket:
-        parser.error("Bucket is required for S3 source.")
+    # if args.source == 's3' and not args.bucket:
+    #     parser.error("Bucket is required for S3 source.")
 
     run_load_test(args)
