@@ -43,9 +43,10 @@ def run_load_test(arguments):
     print(f"Mode: {arguments.source} | Concurrency: {arguments.concurrency}")
     print(f"Target: {arguments.requests} requests")
     print(f"{'=' * 50}\n")
+    print(f"Start Timestamp: {int(time.time())}")
 
     print("Fetching image data...")
-    img_data = get_image_data(arguments.source, arguments.path, arguments.bucket)
+    img_data = get_image_data(arguments.source, arguments.path)
     print(f"Successfully loaded image data ({len(img_data)} bytes).")
 
     results = []
@@ -76,6 +77,10 @@ def run_load_test(arguments):
         avg = sum(latencies) / len(latencies)
         print(f"Average Latency: {avg:.2f} ms")
         print(f"Max Latency: {max(latencies):.2f} ms")
+    else:
+        print("No latency is found. There may be an error occurred during the requests.")
+        print(f"{'=' * 50}")
+        exit(1)
 
     # CSV Writing
     output_filename = arguments.csv if arguments.csv else f"load_test_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
@@ -95,7 +100,7 @@ def run_load_test(arguments):
     #         print("S3 Upload Successful.")
     #     except Exception as e:
     #         print(f"S3 Upload Failed: {e}")
-
+    print(f"End Timestamp: {int(time.time())}")
     print(f"{'=' * 50}\n")
 
 
