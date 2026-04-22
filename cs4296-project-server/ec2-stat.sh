@@ -14,8 +14,8 @@ while true; do
     
     DATA=$(top -b -n 2 -d 0.2 -p "$PIDS" | tail -1 | awk '
         NF {
-            cpu = $(NF-2)
-            mem = $(NF-1)
+            cpu = $(NF-3)
+            mem = $(NF-2)
             gsub(/%/, "", cpu)
             gsub(/%/, "", mem)
             print cpu "," mem
