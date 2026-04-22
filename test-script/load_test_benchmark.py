@@ -43,6 +43,7 @@ def run_load_test(arguments):
     print(f"Mode: {arguments.source} | Concurrency: {arguments.concurrency}")
     print(f"Target: {arguments.requests} requests")
     print(f"{'=' * 50}\n")
+    print(f"Start Timestamp: {int(time.time())}")
 
     print("Fetching image data...")
     img_data = get_image_data(arguments.source, arguments.path, arguments.bucket)
@@ -95,7 +96,7 @@ def run_load_test(arguments):
     #         print("S3 Upload Successful.")
     #     except Exception as e:
     #         print(f"S3 Upload Failed: {e}")
-
+    print(f"End Timestamp: {int(time.time())}")
     print(f"{'=' * 50}\n")
 
 
