@@ -18,44 +18,41 @@ trap cleanup SIGINT
 
 # Check if pidstat is available
 if ! command -v pidstat &> /dev/null; then
-    echo "Error: pidstat not found. Please install sysstat package:"
-    echo "  On Ubuntu/Debian: sudo apt-get install sysstat"
     exit 1
 fi
 
 # Create CSV header
-echo "Timestamp,%CPU,RAM_MB" > "$OUTPUT_FILE"
+echo "Timestamp,CPU,RAM_MB" > "$OUTPUT_FILE"
 
 # Main monitoring loop
 while true; do
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-    
-    # Find uvicorn process PID
-    UVICORN_PID=$(pgrep -f "uvicorn" | head -1)
-    
-    if [ -z "$UVICORN_PID" ]; then
+
+    # Track all uvicorn processes (single worker or multi-worker).
+    UVICORN_PIDS=$(pgrep -f "uvicorn" | paste -sd, -)
+
+    if [ -z "$UVICORN_PIDS" ]; then
         sleep "$INTERVAL"
         continue
     fi
-    
-    # Get CPU and memory stats for the specific uvicorn process
-    STATS=$(pidstat -u -r 1 1 -p "$UVICORN_PID" 2>/dev/null | grep "^$UVICORN_PID" | head -1)
-    
-    if [ -n "$STATS" ]; then
-        # Extract CPU usage (%CPU is typically at position 8 for pidstat -u output)
-        CPU=$(echo "$STATS" | awk '{print $8}')
-        
-        # Extract RAM usage (RSS in KB is typically at position 6 for pidstat -r output, then convert to MB)
-        RAM_KB=$(echo "$STATS" | awk '{print $6}')
-        RAM_MB=$((RAM_KB / 1024))
-        
-        # Write to CSV file only if we have valid data
-        if [ -n "$CPU" ] && [ -n "$RAM_MB" ]; then
-            echo "$TIMESTAMP,$CPU,$RAM_MB" >> "$OUTPUT_FILE"
-        fi
+
+    CPU_SAMPLE=$(pidstat -u -p "$UVICORN_PIDS" "$INTERVAL" 1 2>/dev/null)
+    RAM_SAMPLE=$(pidstat -r -p "$UVICORN_PIDS" "$INTERVAL" 1 2>/dev/null)
+
+    CPU_TOTAL=$(echo "$CPU_SAMPLE" | awk '
+        /^Average:/ && $3 ~ /^[0-9]+$/ {sum += $8; count++}
+        END {if (count > 0) printf "%.2f", sum}
+    ')
+
+    RAM_KB_TOTAL=$(echo "$RAM_SAMPLE" | awk '
+        /^Average:/ && $3 ~ /^[0-9]+$/ {sum += $7; count++}
+        END {if (count > 0) printf "%.0f", sum}
+    ')
+
+    if [ -n "$CPU_TOTAL" ] && [ -n "$RAM_KB_TOTAL" ]; then
+        RAM_MB=$(awk -v kb="$RAM_KB_TOTAL" 'BEGIN {printf "%.2f", kb / 1024}')
+        echo "$TIMESTAMP,$CPU_TOTAL,$RAM_MB" >> "$OUTPUT_FILE"
     fi
-    
-    sleep "$INTERVAL"
 done
 
 
