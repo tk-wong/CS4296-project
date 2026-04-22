@@ -1,44 +1,66 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Installation: pidstat is part of the sysstat package
-# Ubuntu/Debian: sudo apt-get update && sudo apt-get install -y sysstat
-# Verify: which pidstat
+# Script to monitor CPU utilization and RAM usage using pidstat
+# Results are saved to a CSV file with 1-second intervals
+# No arguments required - just run: ./ec2-stat.sh
 
-CSV_NAME="ec2-stat.csv"
+# Hardcoded configuration
+OUTPUT_FILE="ec2_system_stats.csv"
+INTERVAL=1
 
-echo "Timestamp,CPU_Percent,Memory_MB" > "$CSV_NAME"
+# Function to cleanup and exit gracefully
+cleanup() {
+    exit 0
+}
 
+# Trap Ctrl+C to cleanup gracefully
+trap cleanup SIGINT
+
+# Check if pidstat is available
+if ! command -v pidstat &> /dev/null; then
+    echo "Error: pidstat not found. Please install sysstat package:"
+    echo "  On Ubuntu/Debian: sudo apt-get install sysstat"
+    exit 1
+fi
+
+# Create CSV header
+echo "Timestamp,%CPU,RAM_MB" > "$OUTPUT_FILE"
+
+# Main monitoring loop
 while true; do
-    PIDS=$(pgrep -f uvicorn | head -1)
+    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     
-    if [ -z "$PIDS" ]; then
-        sleep 1
+    # Find uvicorn process PID
+    UVICORN_PID=$(pgrep -f "uvicorn" | head -1)
+    
+    if [ -z "$UVICORN_PID" ]; then
+        sleep "$INTERVAL"
         continue
     fi
     
-    # Use pidstat for accurate per-process CPU and memory monitoring
-    # -u = CPU stats, -r = memory stats, -p PID = specific process
-    # 1 2 = 1 second interval, 2 samples (takes ~1 second total)
-    DATA=$(pidstat -u -r -p "$PIDS" 1 2 2>/dev/null | tail -2 | head -1 | awk '
-        NF && $1 ~ /[0-9]+:[0-9]+:[0-9]+/ {
-            cpu = $8
-            printf "%.1f", cpu
-        }')
+    # Get CPU and memory stats for the specific uvicorn process
+    STATS=$(pidstat -u -r 1 1 -p "$UVICORN_PID" 2>/dev/null | grep "^$UVICORN_PID" | head -1)
     
-    MEM=$(pidstat -u -r -p "$PIDS" 1 2 2>/dev/null | tail -1 | awk '
-        NF && $1 ~ /[0-9]+:[0-9]+:[0-9]+/ {
-            rss_kb = $7
-            mem_mb = rss_kb / 1024
-            printf "%.1f", mem_mb
-        }')
-    
-    DATA="$DATA,$MEM"
-    
-    if [ -z "$DATA" ]; then
-        sleep 1
-        continue
+    if [ -n "$STATS" ]; then
+        # Extract CPU usage (%CPU is typically at position 8 for pidstat -u output)
+        CPU=$(echo "$STATS" | awk '{print $8}')
+        
+        # Extract RAM usage (RSS in KB is typically at position 6 for pidstat -r output, then convert to MB)
+        RAM_KB=$(echo "$STATS" | awk '{print $6}')
+        RAM_MB=$((RAM_KB / 1024))
+        
+        # Write to CSV file only if we have valid data
+        if [ -n "$CPU" ] && [ -n "$RAM_MB" ]; then
+            echo "$TIMESTAMP,$CPU,$RAM_MB" >> "$OUTPUT_FILE"
+        fi
     fi
     
-    TIMESTAMP=$(date +%s)
-    echo "$TIMESTAMP,$DATA" >> "$CSV_NAME"
+    sleep "$INTERVAL"
 done
+
+
+
+
+
+
+
