@@ -13,7 +13,7 @@ else
     DOCKER_CMD=(sudo docker)
 fi
 
-echo "Timestamp,CPU_Percent,Memory_Usage" > "$CSV_NAME"
+echo "Timestamp,CPU,Memory_Used" > "$CSV_NAME"
 
 # Loop every 1 second
 while true; do
@@ -23,7 +23,16 @@ while true; do
         sleep 1
         continue # Skip if no data is available
     fi
+
+    CPU_VALUE=$(echo "$STATS" | awk -F',' '{cpu=$1; gsub(/%/, "", cpu); gsub(/[[:space:]]/, "", cpu); print cpu}')
+    MEMORY_VALUE=$(echo "$STATS" | awk -F',' '{mem=$2; sub(/\/.*/, "", mem); gsub(/[[:space:]]/, "", mem); gsub(/[A-Za-z]+$/, "", mem); print mem}')
+
+    if ! [[ "$CPU_VALUE" =~ ^[0-9]+([.][0-9]+)?$ ]] || ! [[ "$MEMORY_VALUE" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+        sleep 1
+        continue # Skip malformed stats rows
+    fi
+
     TIMESTAMP=$(date +%s)
-    echo "$TIMESTAMP,$STATS" >> "$CSV_NAME"
+    echo "$TIMESTAMP,$CPU_VALUE,$MEMORY_VALUE" >> "$CSV_NAME"
     sleep 1
 done
