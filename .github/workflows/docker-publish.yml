@@ -74,6 +74,8 @@ jobs:
           context: cs4296-project-server
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/tk-wong/cs4296-project-server:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
