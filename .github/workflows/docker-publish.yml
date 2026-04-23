@@ -8,8 +8,6 @@ name: Docker
 on:
   push:
     branches: [ "master" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "master" ]
 
@@ -94,3 +92,12 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+            # Keep only the latest GHCR image version (delete older digests)
+      - name: Cleanup old GHCR container versions
+        if: github.event_name != 'pull_request'
+        uses: actions/delete-package-versions@v5
+        with:
+          package-type: container
+          package-name: cs4296-project-server
+          min-versions-to-keep: 1
+          delete-only-untagged-versions: false
