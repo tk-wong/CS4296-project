@@ -99,4 +99,4 @@ jobs:
           package-type: container
           package-name: cs4296-project-server
           min-versions-to-keep: 1
-          delete-only-untagged-versions: false
+          delete-only-untagged-versions: true
