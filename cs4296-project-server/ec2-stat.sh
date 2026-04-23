@@ -5,7 +5,7 @@
 # No arguments required - just run: ./ec2-stat.sh
 
 # Hardcoded configuration
-OUTPUT_FILE="ec2_system_stats.csv"
+OUTPUT_FILE="ec2-system-stats.csv"
 INTERVAL=1
 
 # Function to cleanup and exit gracefully
