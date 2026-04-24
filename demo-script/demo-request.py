@@ -16,7 +16,7 @@ with open ("image.jpg", "rb") as f:
     response = requests.post(url, files=files, timeout=60)
 
 # 3. Display metadata clearly for the video
-print(f"--- API Response Received ---")
+print(f"=== API Response Received ===")
 print(f"Status Code: {response.status_code}")
 if response.status_code != 200:
     print(f"Error: {response.text}")
