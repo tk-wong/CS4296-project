@@ -73,7 +73,7 @@ if __name__ == "__main__":
     parser.add_argument("--url", required=True, help="API Endpoint URL")
     parser.add_argument("--path", required=True, help="Local file path")
     parser.add_argument("--csv", help="Output CSV filename")
-    parser.add_argument("--rounds", type=int, default=5, help="Number of test rounds")
+    parser.add_argument("--rounds", type=int, default=10, help="Number of test rounds")
 
     args = parser.parse_args()
 
