@@ -34,7 +34,7 @@ def run_load_test(arguments):
     print(f" Concurrency: {arguments.concurrency}")
     print(f"Target: {arguments.requests} requests")
     print(f"{'=' * 50}\n")
-    print(f"Start Timestamp: {int(time.time())}")
+    # print(f"Start Timestamp: {int(time.time())}")
 
     print("Fetching image data...")
     img_data = get_image_data(arguments.path)
@@ -82,7 +82,7 @@ def run_load_test(arguments):
         for lat, status in results:
             writer.writerow([time.time(), lat, status])
 
-    print(f"End Timestamp: {int(time.time())}")
+    # print(f"End Timestamp: {int(time.time())}")
     print(f"{'=' * 50}\n")
 
 
