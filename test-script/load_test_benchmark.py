@@ -31,7 +31,7 @@ def run_load_test(arguments):
     print(f"\n{'=' * 50}")
     print(f"STARTING LOAD TEST")
     print(f"URL: {arguments.url}")
-    print(f"Mode: {arguments.source} | Concurrency: {arguments.concurrency}")
+    print(f" Concurrency: {arguments.concurrency}")
     print(f"Target: {arguments.requests} requests")
     print(f"{'=' * 50}\n")
     print(f"Start Timestamp: {int(time.time())}")
