@@ -6,7 +6,6 @@ import time
 import csv
 
 
-
 def get_image_data(path_or_key):
     """
     Returns image bytes based on the source type.
@@ -34,8 +33,8 @@ def run_benchmark(url, image_path, csv_name, rounds):
         try:
             # Send binary data directly
             print(f"Sending request with image data to {url}")
-            response = requests.post(url, files={"image": ("upload.jpeg",image_bytes, "image/jpeg")}, headers={
-                                                                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'},
+            response = requests.post(url, files={"image": ("upload.jpeg", image_bytes, "image/jpeg")}, headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'},
                                      timeout=60)
             if response.status_code != 200:
                 print(f"Warning: Received status code {response.status_code} with message {response.text}")
@@ -58,16 +57,14 @@ def run_benchmark(url, image_path, csv_name, rounds):
 
     # Save to CSV
     print("Writing results to CSV...")
-    
-    final_csv_name = csv_name if csv_name else f"latency_test_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
+
+    final_csv_name = csv_name if csv_name else f"cold_start_test_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
     with open(final_csv_name, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['Round', 'Total Latency (ms)', 'Status code'])
         writer.writerows(results)
     print(f"\nDone! Results saved to {final_csv_name}")
-    
 
-        
     print("Benchmark completed successfully.")
 
 
@@ -79,7 +76,6 @@ if __name__ == "__main__":
     parser.add_argument("--rounds", type=int, default=5, help="Number of test rounds")
 
     args = parser.parse_args()
-
 
     run_benchmark(args.url, args.path, args.csv, args.rounds)
 
